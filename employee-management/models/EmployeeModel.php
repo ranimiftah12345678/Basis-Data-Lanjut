@@ -104,5 +104,70 @@ class EmployeeModel {
         $stmt = $this->conn->prepare($query);
         return $stmt->execute();
     }
+
+    // METHOD 10: Get salary statistics by department
+    public function getSalaryStats() {
+        $query = "SELECT 
+                    department,
+                    AVG(salary) as avg_salary,
+                    MAX(salary) as max_salary,
+                    MIN(salary) as min_salary,
+                    COUNT(*) as employee_count
+                  FROM " . $this->table_name . "
+                  GROUP BY department
+                  ORDER BY avg_salary DESC";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt;
+    }
+
+    // METHOD 11: Get tenure statistics
+    public function getTenureStats() {
+        $query = "SELECT 
+                    first_name,
+                    last_name,
+                    department,
+                    hire_date,
+                    EXTRACT(YEAR FROM AGE(CURRENT_DATE, hire_date)) as years_worked,
+                    CASE 
+                        WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, hire_date)) < 1 THEN 'Junior'
+                        WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, hire_date)) BETWEEN 1 AND 3 THEN 'Middle'
+                        ELSE 'Senior'
+                    END as tenure_category
+                  FROM " . $this->table_name . "
+                  ORDER BY hire_date ASC";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt;
+    }
+
+    // METHOD 12: Get employee overview with salary and tenure
+    public function getEmployeeOverview() {
+        $query = "SELECT 
+                    COUNT(*) as total_employees,
+                    SUM(salary) as total_monthly_salary,
+                    AVG(salary) as avg_salary,
+                    AVG(EXTRACT(YEAR FROM AGE(CURRENT_DATE, hire_date))) as avg_years_service
+                  FROM " . $this->table_name;
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    // METHOD 13: (Baru) Get employees by salary range (memanggil DB Function)
+    public function getEmployeesBySalary($min_salary, $max_salary) {
+        
+        // Query ini memanggil FUNGSI di database, bukan tabel
+        $query = "SELECT * FROM get_employees_by_salary_range(:min_salary, :max_salary)";
+        
+        $stmt = $this->conn->prepare($query);
+
+        // Bind parameters untuk keamanan
+        $stmt->bindParam(":min_salary", $min_salary);
+        $stmt->bindParam(":max_salary", $max_salary);
+
+        $stmt->execute();
+        return $stmt;
+    }
 }
 ?>

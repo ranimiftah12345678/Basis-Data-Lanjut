@@ -85,6 +85,41 @@ switch ($action) {
         $stats = $employeeModel->getDepartmentStats();
         include 'views/department_stats.php';
         break;
+        // TUGAS 1.1: Halaman Statistik Gaji
+    case 'salary_stats':
+        $salaryStats = $employeeModel->getSalaryStats();
+        include 'views/salary_stats.php';
+        break;
+
+    // TUGAS 1.2: Halaman Masa Kerja
+    case 'tenure_stats':
+        $tenureStats = $employeeModel->getTenureStats();
+        include 'views/tenure_stats.php';
+        break;
+
+    // TUGAS 1.3: Halaman Ringkasan Karyawan
+    case 'employee_overview':
+        $overview = $employeeModel->getEmployeeOverview();
+        include 'views/employee_overview.php';
+        break;
+
+    // TUGAS FUNCTION: Halaman Pencarian Gaji
+    case 'search_salary':
+        // Cek apakah form di-submit
+        if ($_POST) {
+            // Ambil data dari form
+            $min_salary = $_POST['min_salary'];
+            $max_salary = $_POST['max_salary'];
+            
+            // Panggil method baru di model (Langkah 2)
+            $results = $employeeModel->getEmployeesBySalary($min_salary, $max_salary);
+        }
+        
+        // Load view (Langkah 3). 
+        // Jika $results ada, view akan menampilkannya.
+        // Jika tidak, view hanya menampilkan form.
+        include 'views/salary_search.php';
+        break;
 
     case 'refresh':
         $employeeModel->refreshDashboard();
